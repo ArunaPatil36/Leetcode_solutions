@@ -1,0 +1,154 @@
+LeetCode Problem Summary: Sorted Array to BST
+Problem ID: 108. Convert Sorted Array to Binary Search Tree
+
+Question
+Given a sorted array nums, convert it into a height-balanced binary search tree (BST).
+Constraints:
+	• 1 <= nums.length <= 10^4
+	• -10^4 <= nums[i] <= 10^4
+	• nums is sorted in ascending order.
+
+Solution
+Approach: Divide-and-Conquer (Recursive)
+Time Complexity: O(n) (each node processed exactly once)
+Space Complexity: O(log n) (recursion stack depth for balanced tree)
+
+Key Insight
+	• Middle element as root ensures the BST is height-balanced (left/right subtrees differ in height by at most 1).
+	• Sorted array property: All elements left of the middle are smaller, all right are larger → satisfies BST invariant.
+
+Corrected Code
+class Solution {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        if (nums.length == 0) return null;
+        return buildBST(nums, 0, nums.length - 1);
+    }
+    
+    private TreeNode buildBST(int[] nums, int start, int end) {
+        if (start > end) return null;
+        int mid = (start + end) / 2;
+        TreeNode node = new TreeNode(nums[mid]);
+        node.left = buildBST(nums, start, mid - 1);    // ✅ Correct: uses current `start`
+        node.right = buildBST(nums, mid + 1, end);      // ✅ Correct: uses current `end`
+        return node;
+    }
+}
+Apply Code
+
+Simple Explanation
+	1. Base Case: If the subarray is empty (start > end), return null.
+	2. Root Selection: Pick the middle element of the current subarray as the root.
+	3. Recursion:
+		○ Left subtree: Build from elements before the middle.
+		○ Right subtree: Build from elements after the middle.
+	4. Result: A height-balanced BST where in-order traversal yields the original sorted array.
+
+Alternative Approach
+Iterative (Stack-Based)
+	• Why it exists: Avoids recursion stack (not faster, but useful for learning).
+	• Trade-off: More complex code, no performance gain over recursion.
+	• Code: See previous response.
+	💡 Key Takeaway:
+	The recursive solution is preferred for its simplicity, readability, and direct alignment with the problem’s divide-and-conquer nature. The iterative approach is not optimized—it’s equivalent in time/space complexity but harder to debug.
+
+Optimized Approach?
+No optimization exists.
+	• Why?
+		○ O(n) is the theoretical lower bound (must process all n elements).
+		○ Recursive solution is already optimal and minimal.
+	• Common Misconceptions to Avoid:
+❌ Using first/last element as root: → Unbalanced tree (O(n) height).
+❌ Inserting elements one-by-one: → O(n log n) time, risks imbalance.
+
+Interview Questions & Answers
+Question	Answer
+Why use the middle element?	Ensures left/right subtrees have nearly equal size → height-balanced BST.
+What if the array isn’t sorted?	The problem states the array is sorted. If not, sort first (O(n log n)), but that’s not required here.
+Time complexity proof?	Each node is processed exactly once → O(n). Recursion depth is O(log n).
+Can we reduce space complexity?	Space is O(log n) (recursion stack). Cannot reduce further for a balanced tree.
+Why not use an iterative approach?	It adds unnecessary complexity without improving time/space. Recursion is clearer.
+
+Why This Solution Dominates
+	1. Correct: Produces a height-balanced BST for any sorted input.
+	2. Efficient: Processes each element exactly once.
+	3. Standard: Matches LeetCode’s official solution and interview expectations.
+	4. No Overhead: No extra data structures (e.g., stacks) needed.
+	✅ Final Verdict: The recursive solution is the only optimal approach. All alternatives are either equivalent or suboptimal.
+
+From <https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/?envType=study-plan-v2&envId=top-interview-150> 
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+Recursive approach is the standard and optimal solution for this problem. However, here's a non-recursive (iterative) alternative using a stack to avoid recursion overhead (though it's not faster—both are O(n)):
+Iterative Approach (Using Stack)
+class Solution {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        if (nums.length == 0) return null;
+        
+        // Create a stack to store (start, end, parent, isLeft)
+        Stack<NodeInfo> stack = new Stack<>();
+        TreeNode root = new TreeNode(0); // Dummy root
+        stack.push(new NodeInfo(0, nums.length - 1, root, true));
+        
+        while (!stack.isEmpty()) {
+            NodeInfo info = stack.pop();
+            int mid = (info.start + info.end) / 2;
+            
+            // Create node
+            TreeNode node = new TreeNode(nums[mid]);
+            if (info.isLeft) {
+                info.parent.left = node;
+            } else {
+                info.parent.right = node;
+            }
+            
+            // Push right subtree (must process after left)
+            if (mid + 1 <= info.end) {
+                stack.push(new NodeInfo(mid + 1, info.end, node, false));
+            }
+            // Push left subtree
+            if (info.start <= mid - 1) {
+                stack.push(new NodeInfo(info.start, mid - 1, node, true));
+            }
+        }
+        return root.left; // Original root was dummy
+    }
+    static class NodeInfo {
+        int start, end;
+        TreeNode parent;
+        boolean isLeft;
+        NodeInfo(int start, int end, TreeNode parent, boolean isLeft) {
+            this.start = start;
+            this.end = end;
+            this.parent = parent;
+            this.isLeft = isLeft;
+        }
+    }
+}
+Apply Code
+Why This Isn't Better (Key Insight)
+Approach	Time Complexity	Space Complexity	Readability	Balance Guarantee
+Recursive	O(n)	O(log n)	✅ High	✅ Guaranteed
+Iterative (Stack)	O(n)	O(log n)	❌ Low	✅ Guaranteed
+Critical Notes:
+	1. No performance gain: Both methods process each node exactly once (O(n)).
+	2. Why recursive is preferred:
+		○ Simpler logic (no stack management).
+		○ Matches the natural divide-and-conquer structure of the problem.
+		○ LeetCode expects this solution (as seen in official solutions).
+	3. Avoid common pitfalls:
+		○ ❌ Naive insertion: Inserting elements one-by-one (O(n log n)) risks unbalanced trees.
+		○ ❌ Using wrong pivot: Picking non-middle elements (e.g., first/last) breaks balance.
+Recommendation
+Stick with the recursive solution—it's the cleanest, most maintainable, and expected by interviewers. The iterative approach is only useful for learning stack-based recursion, not for optimization.
+💡 Key takeaway: For sorted array → balanced BST, the middle-element recursion is the only optimal approach. All other methods either:
+	• Are equivalent in complexity (iterative)
+	• Are suboptimal (insertion-based)
+	• Or are incorrect (unbalanced trees).
+
+From <https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/?envType=study-plan-v2&envId=top-interview-150> 
+
+
