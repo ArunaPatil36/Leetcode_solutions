@@ -1,0 +1,192 @@
+LeetCode Problem Summary: Sort List (Problem #148)
+Problem ID: 148. Sort List
+
+Question
+Sort a singly linked list in O(n log n) time with O(1) space complexity (excluding recursion stack).
+Constraints:
+	• 0 <= List.length <= 5 * 10^4
+	• -10^5 <= Node.val <= 10^5
+
+Solution
+Approach: Merge Sort (Recursive)
+Time Complexity: O(n log n)
+Space Complexity: O(log n) (recursion stack depth for balanced tree) — accepted as "constant" per problem constraints.
+
+Key Insight
+	• Divide-and-Conquer:
+		1. Split the list into two halves (using slow/fast pointers).
+		2. Recursively sort both halves.
+		3. Merge the sorted halves (using the merge function from the previous example).
+	• Why Merge Sort?
+		○ Optimal for linked lists (avoids random access needed for quicksort).
+		○ Naturally splits the list without extra space (except recursion stack).
+
+Corrected Code
+class Solution {
+    public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) return head;
+        
+        // Split list into two halves
+        ListNode slow = head, fast = head, prev = null;
+        while (fast != null && fast.next != null) {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        prev.next = null; // Cut the list at middle
+        
+        // Recursively sort both halves
+        ListNode left = sortList(head);
+        ListNode right = sortList(slow);
+        
+        // Merge sorted halves
+        return merge(left, right);
+    }
+    
+    private ListNode merge(ListNode left, ListNode right) {
+        if (left == null) return right;
+        if (right == null) return left;
+        
+        if (left.val < right.val) {
+            left.next = merge(left.next, right);
+            return left;
+        } else {
+            right.next = merge(left, right.next);
+            return right;
+        }
+    }
+}
+Apply Code
+
+Simple Explanation
+	1. Base Case: If list has 0 or 1 node, it's sorted.
+	2. Split:
+		○ Use slow/fast pointers to find the middle node.
+		○ Split the list into left (head to middle) and right (middle+1 to end).
+	3. Recursion:
+		○ Sort left and right halves recursively.
+	4. Merge:
+		○ Combine sorted halves (like merging two sorted arrays) using the merge function.
+		○ Example: 1→3→5 + 2→4→6 → 1→2→3→4→5→6.
+
+Alternative Approach
+Iterative (Bottom-Up) Merge Sort
+	• How it works:
+		○ Start with sublists of size 1, merge adjacent pairs, double size each iteration.
+		○ Uses dummy head and no recursion (O(1) space excluding input).
+	• Why consider it?
+		○ Avoids recursion stack (O(1) space vs. O(log n) for recursive).
+		○ More complex to implement but avoids stack overflow for very long lists.
+	• Trade-off:
+		○ Recursive: Simpler, readable, O(log n) space (accepted).
+		○ Iterative: More efficient in space (O(1)), but harder to debug.
+
+Optimized Approach?
+No optimization exists for time complexity (O(n log n) is optimal for comparison-based sort).
+	• Recursive solution is the standard and recommended approach for this problem.
+	• Why not other sorts?
+		○ Quicksort: Worst-case O(n²), requires random access (inefficient for linked lists).
+		○ Heapsort: O(n log n) time but O(n) space for heap (not O(1)).
+	💡 Key Takeaway:
+	The recursive merge sort is the optimal solution for LeetCode 148. The iterative approach is an alternative but not "optimized" — it trades readability for slightly lower space usage.
+
+Interview Questions & Answers
+Question	Answer
+Why merge sort?	It’s O(n log n) time, stable, and works efficiently with linked lists (no random access).
+Why not quicksort?	Quicksort has O(n²) worst-case time and needs random access (linked lists don’t support it).
+How do you split the list?	Use slow/fast pointers (fast moves twice as fast as slow → slow stops at middle).
+What’s the space complexity?	O(log n) for recursion stack (accepted as "constant" per problem constraints).
+Can we do O(1) space?	Yes, with iterative merge sort, but it’s more complex. Recursive is preferred for clarity.
+Why not convert to array?	That would use O(n) extra space (violates problem constraints).
+
+Why This Solution Dominates
+	1. Correct: Produces a fully sorted linked list.
+	2. Efficient: O(n log n) time (optimal for comparison-based sort).
+	3. Standard: Matches LeetCode’s official solution and interview expectations.
+	4. Readable: Recursive structure mirrors the problem’s natural divide-and-conquer logic.
+	✅ Final Verdict:
+	Recursive merge sort is the only practical solution for this problem. The iterative approach is an academic alternative but not required for interviews or LeetCode.
+
+From <https://leetcode.com/problems/sort-list/?envType=study-plan-v2&envId=top-interview-150> 
+
+
+
+
+Merge function:
+Here's a simple, step-by-step explanation of the merge function using a concrete example:
+
+Problem
+Merge two sorted linked lists into one sorted linked list (like merging two halves in merge sort).
+
+Example
+	• left = 1 → 3 → 5
+	• right = 2 → 4 → 6
+Goal: Merge into 1 → 2 → 3 → 4 → 5 → 6
+
+How the Code Works
+(Step-by-step with the example)
+Step 1: Compare heads
+	• left.val = 1, right.val = 2
+	• 1 < 2 → left becomes the new head
+left.next = merge(left.next, right); 
+// left.next = merge(3→5, 2→4→6)
+Apply Code
+Step 2: Recursive call
+Now merge left = 3→5 and right = 2→4→6
+	• Compare 3 and 2 → 2 < 3 → right becomes next
+right.next = merge(left, right.next); 
+// right.next = merge(3→5, 4→6)
+Apply Code
+Step 3: Recursive call again
+Now merge left = 3→5 and right = 4→6
+	• Compare 3 and 4 → 3 < 4 → left becomes next
+left.next = merge(left.next, right); 
+// left.next = merge(5, 4→6)
+Apply Code
+Step 4: Recursive call again
+Now merge left = 5 and right = 4→6
+	• Compare 5 and 4 → 4 < 5 → right becomes next
+right.next = merge(left, right.next); 
+// right.next = merge(5, 6)
+Apply Code
+Step 5: Base case
+Merge left = 5 and right = 6
+	• 5 < 6 → left becomes head, left.next = right
+// Returns 5 → 6
+Apply Code
+
+Result
+The recursion builds the merged list backwards:
+	1. 5 → 6
+	2. 4 → (5 → 6) → 4 → 5 → 6
+	3. 3 → (4 → 5 → 6) → 3 → 4 → 5 → 6
+	4. 2 → (3 → 4 → 5 → 6) → 2 → 3 → 4 → 5 → 6
+	5. 1 → (2 → 3 → 4 → 5 → 6) → 1 → 2 → 3 → 4 → 5 → 6
+
+Why It Works
+	• Base cases handle empty lists.
+	• Recursive step picks the smaller head and links it to the merged rest of the lists.
+	• No new nodes are created—it reuses existing nodes by reassigning next pointers.
+	• Time Complexity: O(n + m) (where n and m are list lengths).
+
+Key Insight
+	🔄 The recursion "peels off" the smallest remaining element at each step, building the merged list from head to tail.
+	(It’s like picking the smallest card from two piles and placing it on the table, then repeating.)
+
+Visual Summary
+left: 1 → 3 → 5
+right: 2 → 4 → 6
+
+Step 1: 1 (smallest) → merge(3→5, 2→4→6)
+Step 2: 2 (smallest) → merge(3→5, 4→6)
+Step 3: 3 (smallest) → merge(5, 4→6)
+Step 4: 4 (smallest) → merge(5, 6)
+Step 5: 5 (smallest) → 6
+Final: 1 → 2 → 3 → 4 → 5 → 6 ✅
+
+Common Mistake to Avoid
+❌ Creating new nodes (e.g., new ListNode(val)) → Wastes space.
+✅ Reusing existing nodes (by reassigning next) → O(1) extra space (except recursion stack).
+This is the standard way to merge linked lists in merge sort! 🌟
+
+From <https://leetcode.com/problems/sort-list/?envType=study-plan-v2&envId=top-interview-150> 
