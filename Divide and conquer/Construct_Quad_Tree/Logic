@@ -1,0 +1,123 @@
+LeetCode Problem: Construct Quad Tree (Problem #427)
+Problem Summary:
+Given a grid (2D array of 0s and 1s), construct a quadtree where:
+
+Leaf nodes represent uniform regions (all 0s or all 1s).
+Non-leaf nodes represent mixed regions (with 4 children: top-left, top-right, bottom-left, bottom-right).
+Detailed Code Explanation with Example
+Example Grid:
+int[][] grid = {
+    {0, 0, 0, 0},
+    {0, 1, 1, 0},
+    {0, 1, 1, 0},
+    {0, 0, 0, 0}
+};
+Apply Code
+This grid has a "hole" (1s) in the center, surrounded by 0s.
+
+Step-by-Step Execution
+1. Root Call: help(grid, 0, 0, 4)
+Check entire grid (4x4): Not uniform (contains 0s and 1s) → allSame = false.
+Split into 4 quadrants (each 2x2):
+tL: Top-left ([0,0] to [1,1]) → [[0,0],[0,1]]
+tR: Top-right ([0,2] to [1,3]) → [[0,0],[1,0]]
+bL: Bottom-left ([2,0] to [3,1]) → [[0,1],[0,1]]
+bR: Bottom-right ([2,2] to [3,3]) → [[1,0],[1,0]]
+2. Recursively Process Each Quadrant
+(All quadrants are not uniform → each splits further)
+
+Top-Left Quadrant (tL): help(grid, 0, 0, 2)
+Region: [[0,0],[0,1]] → Not uniform.
+Split into 4 1x1 leaves:
+tL1: [0,0] → 0 → new Node(false, true)
+tR1: [0,1] → 0 → new Node(false, true)
+bL1: [1,0] → 0 → new Node(false, true)
+bR1: [1,1] → 1 → new Node(true, true)
+Return non-leaf node:
+new Node(false, false, tL1, tR1, bL1, bR1)
+Apply Code
+Top-Right Quadrant (tR): help(grid, 0, 2, 2)
+Region: [[0,0],[1,0]] → Not uniform.
+Split into 4 1x1 leaves:
+0 → false, 0 → false, 1 → true, 0 → false
+Return non-leaf node (similar to tL).
+(Bottom-left and bottom-right quadrants follow the same pattern.)
+
+Final Quadtree Structure
+Root (non-leaf)
+├── Top-Left (non-leaf) → 4 leaves: [0,0,0,1]
+├── Top-Right (non-leaf) → 4 leaves: [0,0,1,0]
+├── Bottom-Left (non-leaf) → 4 leaves: [0,1,0,1]
+└── Bottom-Right (non-leaf) → 4 leaves: [1,0,1,0]
+Key Code Breakdown
+1. allSame Check
+boolean allSame = true;
+int init = grid[r][c];
+for (int i = r; i < r + n; i++) {
+    for (int j = c; j < c + n; j++) {
+        if (grid[i][j] != init) {
+            allSame = false;
+            break outerLoop; // Early termination
+        }
+    }
+}
+Apply Code
+Purpose: Checks if the current region (size n x n) is uniform (all 0s or all 1s).
+Why break outerLoop? Avoids unnecessary checks once a mismatch is found.
+2. Leaf Node Creation
+return new Node(init == 1, true); // ✅ Correct
+Apply Code
+init == 1:
+true → Region is all 1s (e.g., [[1,1],[1,1]]).
+false → Region is all 0s (e.g., [[0,0],[0,0]]).
+true for isLeaf: Critical—marks this node as a leaf (no children).
+3. Non-Leaf Node Creation
+return new Node(false, false, tL, tR, bL, bR); // ✅ Correct
+Apply Code
+false for val:
+Irrelevant (LeetCode ignores val for non-leaf nodes).
+Not "meaning 0"—it’s a placeholder.
+false for isLeaf:
+Correctly marks this node as non-leaf (has children).
+Why the Code is Correct
+Node Type	isLeaf	val	Meaning
+Leaf	true	true/false	true = all 1s, false = all 0s.
+Non-Leaf	false	Ignored	val can be true/false (LeetCode doesn’t check it).
+💡 Critical Insight:
+
+Leaf nodes store actual values (val = true for 1, false for 0).
+Non-leaf nodes only store children—val is always ignored.
+The false in val for non-leaf nodes is not related to the value 0—it’s a convention.
+Common Misconceptions Clarified
+❌ Misconception:
+"Non-leaf node’s val = false means it represents 0."
+
+✅ Reality:
+The val field only matters for leaf nodes.
+For non-leaf nodes, val is irrelevant (LeetCode ignores it).
+1s are stored in leaf nodes as val = true (e.g., a region of 1s → new Node(true, true)).
+Why the Example Works
+In the grid:
+
+[[0,0,0,0],
+ [0,1,1,0],
+ [0,1,1,0],
+ [0,0,0,0]]
+Apply Code
+Center 1s → Stored in leaf nodes with val = true (e.g., the 1 at [1,1] → new Node(true, true)).
+Root node → val = false (ignored), isLeaf = false (correctly non-leaf).
+Interview Questions & Answers
+Question	Answer
+Why val = false for non-leaf nodes?	val is irrelevant for non-leaf nodes. LeetCode ignores it. false is a placeholder (could be true too).
+How are 1s stored?	In leaf nodes as val = true (e.g., new Node(true, true) for a region of all 1s).
+What if we set val = true for non-leaf nodes?	It would still pass LeetCode tests (since val is ignored). false is standard for clarity.
+Why not use val for non-leaf nodes?	The problem states val is only meaningful for leaves. Non-leaf nodes must have isLeaf = false.
+What happens if isLeaf = true for a non-uniform region?	Invalid—the quadtree would be broken. The code correctly sets isLeaf = false for mixed regions.
+Why This Code is Optimal
+Time Complexity: O(n²) (each cell processed once).
+Space Complexity: O(log n) (recursion depth for balanced splits).
+Correctness:
+Uses divide-and-conquer (splits until uniform regions).
+Follows LeetCode’s quadtree structure (leaf nodes have isLeaf = true).
+✅ Final Verdict:
+The code perfectly implements the quadtree as required. The false in val for non-leaf nodes is not a bug—it’s a standard placeholder for an ignored field.
