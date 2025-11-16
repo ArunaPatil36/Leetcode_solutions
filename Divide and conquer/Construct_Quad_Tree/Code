@@ -1,0 +1,29 @@
+//Construct Quad Tree
+
+class Solution {
+    public Node construct(int[][] grid) {
+        return help(grid,0,0,grid.length);
+    }
+
+    private Node help(int[][] grid, int r, int c, int n){
+        boolean allSame=true;
+        int init=grid[r][c];
+        outerLoop:
+        for(int i=r;i<r+n;i++){
+            for(int j=c;j<c+n;j++){
+                if(grid[i][j] != init){
+                    allSame=false;
+                    break outerLoop;
+                }
+            }
+        }
+        if(allSame){
+            return new Node(init == 1, true);
+        }
+        Node tL=help(grid,r,c,n/2);
+        Node tR=help(grid,r,c+n/2,n/2);
+        Node bL=help(grid,r+n/2,c,n/2);
+        Node bR=help(grid,r+n/2,c+n/2,n/2);
+        return new Node(false,false,tL,tR,bL,bR);
+    }
+}
